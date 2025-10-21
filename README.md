@@ -5,7 +5,7 @@ AI-powered weather assistant that provides personalized clothing and activity re
 ## Features
 
 - Fetches 5-day weather forecasts from OpenWeatherMap API
-- AI-powered recommendations using Groq's LLaMA 3.1 model (temperature: 0.8)
+- AI-powered recommendations using Groq's LLaMA 3.3 versatile model (temperature: 0.1)
 - Enhanced prompt engineering with role assignment and constraints
 - Input validation (date range, city verification, empty inputs)
 - Clean CLI interface with emojis and structured output
@@ -16,7 +16,7 @@ AI-powered weather assistant that provides personalized clothing and activity re
 
 1. **User Input**: Enter city name and date (within 5 days)
 2. **Weather Fetch**: Retrieves forecast from OpenWeatherMap API
-3. **AI Processing**: Sends structured prompt to Groq's LLaMA 3.1 model with:
+3. **AI Processing**: Sends structured prompt to Groq's LLaMA 3.3 model with:
     - Role assignment (local weather assistant)
     - Weather context
     - Specific output structure
@@ -28,14 +28,14 @@ AI-powered weather assistant that provides personalized clothing and activity re
 - **Language:** Python 3.x
 - **APIs:**
     - OpenWeatherMap (weather data)
-    - Groq API (AI recommendations with LLaMA 3.1)
+    - Groq API (AI recommendations with LLaMA 3.3)
 - **Libraries:** requests, python-dotenv
 
 ## Installation
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/weatherAssistant.git
+git clone https://github.com/dancho998/weatherAssistant.git
 cd weatherAssistant
 ```
 
@@ -60,6 +60,9 @@ source venv/bin/activate
 ```bash
 pip install -r requirements.txt
 ```
+**Dependencies:**
+- `requests==2.32.5` - HTTP library for API calls
+- `python-dotenv==1.1.1` - Environment variable management
 
 ### 5. Set up API keys
 
@@ -126,9 +129,9 @@ Enter a date (example 2025-10-30): 2025-10-22
 ```
 weatherAssistant/
 ├── venv/                    # Virtual environment
-├── .env                     # API keys (not tracked by git)
+├── .env                     # API keys
 ├── .gitignore              # Git ignore file
-├── README.md               # This file
+├── README.md               # 
 ├── requirements.txt        # Python dependencies
 └── weatherAssistant.py     # Main application
 ```
@@ -139,7 +142,7 @@ weatherAssistant/
 - **Structured Output**: Specific format (what to wear, do, avoid)
 - **Negative Prompting**: Constraints on what NOT to include
 - **Context Loading**: City-specific advice
-- **Temperature Control**: Set to 0.8 for creative yet practical responses
+- **Temperature Control**: Set to 0.1 for deterministic responses
 
 ## Error Handling
 
@@ -156,6 +159,21 @@ The application validates:
 - Weather forecast limited to 5 days (OpenWeatherMap free tier)
 - Requires active internet connection
 - API rate limits apply (1000 calls/day for OpenWeatherMap free tier)
+
+## Troubleshooting
+
+### SSL Certificate Verification
+
+By default, the code includes `verify=False` in API requests to avoid SSL certificate errors caused by corporate proxies or antivirus software that intercept HTTPS traffic.
+
+**If you want to enable SSL verification (recommended for production):**
+- Remove `verify=False` from `requests.get()` in `fetch_weather_data()`
+- Remove `verify=False` from `requests.post()` in `get_ai_recommendations()`
+
+**Note:** After enabling verification, if you encounter SSL errors, you may need to:
+- Configure your antivirus to exclude Python from HTTPS scanning
+- Add your corporate proxy certificate to Python's trust store
+- Use a different network without SSL inspection
 
 
 ## License
