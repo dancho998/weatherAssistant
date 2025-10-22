@@ -5,6 +5,9 @@ from datetime import datetime, timedelta
 
 load_dotenv()
 
+OW_API_URL = "https://api.openweathermap.org/data/2.5/forecast"
+GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+
 
 # Ucitavanje API kljuceva
 def load_api_keys() -> dict[str, str]:
@@ -49,16 +52,22 @@ def get_user_input() -> tuple[str, str]:
 
 # dohvacanje vremena
 def fetch_weather_data(city: str, date: str, api_key: str) -> dict | None:
-    url: str = f"https://api.openweathermap.org/data/2.5/forecast?q={city}&appid={api_key}&units=metric"
-    # print(f"URL: {Url}")
-    response = requests.get(url,verify=False)
-    # print(f"Status code: {response.status_code}")
+    params = {
+        "q": city,
+        "appid": api_key,
+        "units": "metric"
+    }
 
-    if response.status_code == 404:
-        print("City not found")
+    response = requests.get(OW_API_URL, params=params, verify=False)
+
+    if response.status_code != 200:
+        print(f"Error: Failed to fetch weather data (Status: {response.status_code})")
+        if response.status_code == 404:
+            print("  → City not found")
         return None
 
     data: dict = response.json()
+
     for item in data['list']:
         if item['dt_txt'].startswith(date):
             return {
@@ -68,6 +77,7 @@ def fetch_weather_data(city: str, date: str, api_key: str) -> dict | None:
                 "wind_speed": item['wind']['speed'],
                 "pop": item.get('pop', 0)
             }
+
     print("Error: No weather data for that date.")
     return None
 
@@ -107,7 +117,6 @@ def create_ai_prompt(city: str, date: str, weather_data: dict) -> str:
 
 # dobivanje preporuka
 def get_ai_recommendations(prompt: str, api_key: str) -> str:
-    url: str = "https://api.groq.com/openai/v1/chat/completions"
 
     headers: dict[str, str] = {
         "Authorization": f"Bearer {api_key}",
@@ -116,7 +125,7 @@ def get_ai_recommendations(prompt: str, api_key: str) -> str:
 
     payload: dict = {'model': 'llama-3.3-70b-versatile', 'messages': [{'role': 'user', 'content': prompt}],
                      'temperature': 0.1}
-    response = requests.post(url, headers=headers, json=payload, verify=False)
+    response = requests.post(GROQ_API_URL, headers=headers, json=payload, verify=False)
 
     data: dict = response.json()
     ai_text: str = data["choices"][0]["message"]["content"]
@@ -152,9 +161,16 @@ def main() -> None:
     city: str
     date: str
     city, date = get_user_input()
+
     weather: dict | None = fetch_weather_data(city, date, keys["openWeather"])
+    if weather is None:
+        print("failed to fetch weather data. Pls try again")
+        return
+
     prompt: str = create_ai_prompt(city, date, weather)
+
     recommendations: str = get_ai_recommendations(prompt, keys['groq'])
+
     display_results(city, date, weather, recommendations)
 
 

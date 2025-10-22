@@ -25,7 +25,7 @@ AI-powered weather assistant that provides personalized clothing and activity re
 
 ## Technologies
 
-- **Language:** Python 3.x
+- **Language:** Python 3.11
 - **APIs:**
     - OpenWeatherMap (weather data)
     - Groq API (AI recommendations with LLaMA 3.3)
